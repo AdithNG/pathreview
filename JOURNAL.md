@@ -154,7 +154,7 @@ commit so it can be split out if the maintainer prefers.
 
 ### Check-in 2 (end of week)
 
-**PR link:** _(added when the PR is opened — see below)_
+**PR link:** https://github.com/ascherj/pathreview/pull/330
 
 **Branch:** `fix/148-skill-extractor-js-ts-detection`
 
