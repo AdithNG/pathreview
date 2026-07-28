@@ -53,7 +53,8 @@ matching the reported behavior exactly.
 
 **PLAN.md link:** https://github.com/AdithNG/pathreview/blob/fix/148-skill-extractor-js-ts-detection/PLAN.md
 
-**Walkthrough video (recommended):** _(not recorded yet — optional and not graded)_
+**Walkthrough video (recommended):** None — this deliverable is recommended but not graded, so I
+put the time into the written reproduction and plan instead.
 
 **Blockers or open questions:**
 - `test_database_technology_detection` also fails, but it is **not** one of the four tests
@@ -193,5 +194,7 @@ named in issue #148. Both files I changed pass ruff, black, and mypy individuall
 49 failures and 177 ruff errors are pre-existing in other modules, and I documented them in the PR
 description.
 
-**Draft PR feedback received from:** _(pending — to be requested in Slack)_
+**Draft PR feedback received from:** None. I opened the PR ready for review rather than as a draft,
+and have asked for a peer look in Slack. Any feedback that arrives will be recorded with my
+response in the Week 10 section.
 
