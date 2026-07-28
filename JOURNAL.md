@@ -41,7 +41,7 @@ Verified working: frontend at localhost:5173 (HTTP 200), API docs at localhost:8
 
 ## Week 8 — Reproduction & solution planning
 
-**Reproduction commit link:** _(this commit — link added below once pushed)_
+**Reproduction commit link:** https://github.com/AdithNG/pathreview/commit/c050e23727f4ac8d3a56fc1e6919d08758048e40
 
 **Reproduction summary:**
 I reproduced the issue two ways in my local environment: by running
@@ -51,9 +51,9 @@ on the samples from the issue body. JavaScript text returns an empty list, TypeS
 returns only `['React']`, and Dockerfile/compose text returns no Docker detection at all —
 matching the reported behavior exactly.
 
-**PLAN.md link:** _(added below once pushed)_
+**PLAN.md link:** https://github.com/AdithNG/pathreview/blob/fix/148-skill-extractor-js-ts-detection/PLAN.md
 
-**Walkthrough video (recommended):** _(not yet recorded)_
+**Walkthrough video (recommended):** _(not recorded yet — optional and not graded)_
 
 **Blockers or open questions:**
 - `test_database_technology_detection` also fails, but it is **not** one of the four tests
