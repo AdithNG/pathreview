@@ -198,3 +198,107 @@ description.
 and have asked for a peer look in Slack. Any feedback that arrives will be recorded with my
 response in the Week 10 section.
 
+---
+
+## Week 10 — Iteration & reflection
+
+### Reviewer feedback
+
+**Feedback received:** [ ] Yes  [x] No — still awaiting review
+
+**Summary of feedback:**
+No review has arrived. As of the end of Week 10, PR #330 has zero reviews, zero inline comments,
+and zero conversation comments. I checked the PR's review and comment endpoints directly rather
+than relying on GitHub notifications, so I am confident nothing was missed. This matches the
+course note that reviewer feedback is not part of the Summer 2026 term, and it is also normal for
+open source generally — the repository has over 150 open PRs against a single maintainer.
+
+**How you responded:**
+No response was required, but I did not treat the absence of review as the end of the work. In the
+PR description I left two open questions under "Notes for Reviewers" that I would want a maintainer
+to weigh in on: whether `JS_TS_KEYWORDS` was intended as the primary detection signal (I
+deliberately demoted it to supporting evidence, which is a visible departure from how the issue
+describes the root cause), and whether reporting both JavaScript and TypeScript for the same text
+is desirable or whether TypeScript should suppress JavaScript the way the original code did. I also
+flagged two things that belong in separate issues rather than in my PR: the `psycopg2` driver is not
+mapped to PostgreSQL in the `DATABASES` dict, which is why
+`test_database_technology_detection` still fails, and the pre-commit `mypy` hook blocks every
+commit that touches a test file. If a reviewer disagrees with any of my judgement calls, the
+implementation is isolated in `_detect_js_ts()` and `_detect_docker()` and would be
+straightforward to change.
+
+---
+
+### Reflection
+
+**What was harder than you expected?**
+Getting the environment running was by far the hardest part, and none of the difficulty was in the
+project's own code. My `make setup` failed with
+`asyncpg.exceptions.InvalidPasswordError: password authentication failed for user "pathreview"`,
+and I hit that same error message twice for two completely different reasons: first because I had
+never copied `.env.example` to `.env`, so the app used its built-in default of port 5432 where a
+native Windows `postgres.exe` service was listening, and then again because a leftover container
+from an unrelated project of mine was already bound to port 5433 — the exact port PathReview remaps
+to in order to avoid conflicts. On top of that, `scripts/seed_db.py` prints ✓ and ✗ characters that
+crash on the default Windows cp1252 console, so a `UnicodeEncodeError` was burying the real error
+and making even successful runs exit non-zero until I ran everything with `PYTHONUTF8=1`. I had
+budgeted my time for the fix and almost none for setup, and the ratio ended up being closer to the
+reverse.
+
+**What did you learn about working in a large codebase?**
+The most useful thing I did all module was record a baseline before touching anything. The repo had
+53 failing unit tests and 182 ruff errors before my first edit, so "does the suite pass" was
+a meaningless question — I had to save the sorted failure list and diff against it afterwards to
+prove I had fixed exactly four tests and broken nothing. Without that, my final run showing 49
+failures would have looked like I had broken things. I also learned to check who calls the code
+before changing it: grep showed the parser `SkillExtractor` is imported only by its own test file,
+which told me the change was isolated and that its tests were the real contract. Relatedly, there
+are two different classes named `SkillExtractor` in this repo — one in `ingestion/parsers/` and one
+in `agent/tools/` — and reading the issue's file list carefully was the only thing that kept me in
+the right one. Finally, matching local convention beat applying general best practice: when the
+pre-commit `mypy` hook demanded type annotations on my new tests, I checked and found that 0 of 21
+test files in the repo annotate anything, so annotating mine would have made my file the odd one
+out.
+
+**How did AI tools help — and where did they fall short?**
+AI was most useful for orientation and for the mechanical parts of verification. It let me map six
+subsystems in one session instead of a week, and it caught things I would not have thought to look
+for — that the entire review pipeline in `core/services/review_service.py` is hardcoded
+placeholders, that the safety layer is never actually wired into the request flow, and that
+`GET /health` returns 503 unconditionally because it passes a raw SQL string to `db.execute()`.
+Knowing all of that up front kept me away from issues that looked small but depended on a pipeline
+that does not run end to end. Where it fell short was judgement about intent. The issue frames the
+root cause as "`JS_TS_KEYWORDS` is defined but never used," and the obvious move — and the one an
+AI will happily implement, because it explains what code *does* rather than what it *should* do —
+is to wire that constant up as the primary detection signal. Doing that literally reintroduces a
+bug, because four of its ten entries (`import`, `async`, `await`, `class`) are Python keywords, so
+`import psycopg2` gets reported as JavaScript. I only found that by actually running the extractor
+on Python input and reading the output, not by reasoning about the code. The other thing AI could
+not tell me was the repo's social reality: that a neighbouring test in the file I had to edit was
+broken in a way that made ruff reject every commit, and that the fix for it was out of my issue's
+scope.
+
+**What would you do differently if you started over?**
+Three things. First, I would set up and verify the environment before selecting an issue instead of
+after — I chose #148 while my `make setup` was still failing, and if setup had turned out to be
+genuinely broken I would have burned selection time twice. Second, I would check for port conflicts
+from my own other Docker projects at the very start, since that one habit would have saved most of
+a night. Third, and most importantly for the process, I would open the draft PR early in the week
+instead of opening a finished PR at the deadline. I got no peer feedback at all, which is entirely
+my own sequencing, and I had two genuine design questions that a second pair of eyes would have
+settled faster than my own reasoning did. I would also probably pick a less crowded issue: five
+other students had claimed #148 by the time I finished, and a less contested one would likely have
+meant more useful discussion.
+
+**What are you most proud of from this module?**
+The bug nobody asked me to find. The issue listed four failing tests, and the fastest path to a
+green suite was to make those four pass and stop. But while reproducing the problem I ran the
+extractor on plain Python code and saw `import psycopg2` come back as
+`['Python', 'JavaScript']` — a false positive that no test covered and the issue never mentioned,
+caused by the same regex the issue was complaining about. Fixing it changed my whole approach: it
+is why I used `JS_TS_KEYWORDS` as supporting evidence instead of as the primary signal, and why
+three of my six new tests are regression guards for inputs that must *not* be detected rather than
+inputs that must be. I am more proud of that than of the four tests I was asked to fix, because it
+came from actually understanding the code instead of satisfying the test names in the issue.
+
+
