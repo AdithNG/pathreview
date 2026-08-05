@@ -170,7 +170,8 @@ JavaScript, and adds a word boundary to the Python type-annotation pattern so Ty
 `: string` is no longer counted as Python's `: str`.
 
 **Tests added or updated:**
-`tests/unit/test_skill_extractor.py` — six new tests. Three cover the new detection paths:
+`tests/unit/test_skill_extractor.py` — seven new tests, taking the file from 18 tests to 25. Three
+cover the new detection paths:
 TypeScript detected from prose with no filename argument, JavaScript detected from ES6
 `import ... from` / `export default` syntax, and Docker detected from a Dockerfile whose text never
 contains the word "docker". Three are regression guards against false positives: `import psycopg2`
@@ -297,7 +298,7 @@ extractor on plain Python code and saw `import psycopg2` come back as
 `['Python', 'JavaScript']` — a false positive that no test covered and the issue never mentioned,
 caused by the same regex the issue was complaining about. Fixing it changed my whole approach: it
 is why I used `JS_TS_KEYWORDS` as supporting evidence instead of as the primary signal, and why
-three of my six new tests are regression guards for inputs that must *not* be detected rather than
+three of my seven new tests are regression guards for inputs that must *not* be detected rather than
 inputs that must be. I am more proud of that than of the four tests I was asked to fix, because it
 came from actually understanding the code instead of satisfying the test names in the issue.
 
